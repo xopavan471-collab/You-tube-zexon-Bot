@@ -5,7 +5,7 @@ from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, 
 # Apni API details aur Bot Token yahan dalein
 API_ID = 33208732  # Apna API ID dalein
 API_HASH = "28626a3063a8161fc374ce904093c4e0"
-BOT_TOKEN = "8684241293:AAH8SW8mAIKWLyU-hnWUEiNvfOfuluMF6lM"
+BOT_TOKEN = "8684241293:AAH1MjZvkU0HEs3N1soJe0oYGQgLmp1I6NY"
 ADMIN_ID = 123456789  # Yahan apni Telegram Admin ID dalein
 
 app = Client("zexon_renamer_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
@@ -133,19 +133,20 @@ async def handle_file(client: Client, message: Message):
         'waiting_for_name': True
     }
 
-    msg = await message.reply_text("⏳ Processing file... Please wait.")
+    msg = await message.reply_text("Processing...⚡")
     
     for _ in range(3):
         await asyncio.sleep(20)
 
     await msg.edit_text(
-        f"✅ File analyzed successfully!\n\n"
-        f"📁 **Old Name:** `{user_data[user_id]['file_name']}`\n"
-        f"📦 **Size:** `{user_data[user_id]['file_size']}`\n\n"
-        "✍️ **Ab is file ke liye naya naam (New Name) bhejiye:**"
+        f" File analyzed successfully!\n\n"
+        f"**Old Name:** `{user_data[user_id]['file_name']}`\n"
+        f"**Size:** `{user_data[user_id]['file_size']}`\n\n"
+        "**Now send me new name:**"
     )
 
-@app.on_message(filters.text & ~filters.command())
+# Yahan fix kar diya hai (bina brackets ke ~filters.command)
+@app.on_message(filters.text & ~filters.command)
 async def handle_text_name(client: Client, message: Message):
     user_id = message.from_user.id
 
@@ -210,7 +211,7 @@ async def handle_text_name(client: Client, message: Message):
     await status_msg.edit_text(
         f"Status Uploading :\n"
         f"▣▣▣▣▣▣▣▣▣▣▣▣▣▣ 100%\n\n"
-        f"Size: {file_size} | {file_size}\n"
+        f"Size: {file_size} / {file_size}\n"
         f"Speed: 3.5 MB\n"
         f"ETA: 00:00"
     )
@@ -228,6 +229,6 @@ async def handle_text_name(client: Client, message: Message):
     del user_data[user_id]
 
 if __name__ == "__main__":
-    print("🤖 Pyrogram Bot with About & Close Buttons is running...")
+    print("🤖 Pyrogram Bot is running successfully...")
     app.run()
     
