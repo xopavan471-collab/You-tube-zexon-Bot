@@ -1,6 +1,6 @@
 import asyncio
 from pyrogram import Client, filters
-from pyrogram.types import Message
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 
 # Apni API details aur Bot Token yahan dalein
 API_ID = 33208732  # Apna API ID dalein
@@ -18,17 +18,88 @@ total_renamed_files = 0   # Total stats
 @app.on_message(filters.command("start"))
 async def start(client: Client, message: Message):
     user = message.from_user
-    # User info system mein add karna
     registered_users.add(user.id)
 
-    await message.reply_text(
-        f"👋 Hello **{user.first_name}**!\n"
-        "Mujhe koi bhi file bhejiye (Up to 1GB), main use rename karne mein aapki madad karunga."
+    photo_url = "https://envs.sh/X_v.jpg" # Aesthetic anime banner image
+    
+    start_caption = (
+        f"Hello ᴍʀ ᴢᴇxᴏɴ !!\n\n"
+        f"This is an advanced and fast rename bot that supports files larger than 2GB, metadata editing, custom captions, and many other advanced tools.\n\n"
+        f"Maintained by: Elites Botz"
     )
+
+    # Inline buttons with Close instead of Help
+    keyboard = InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("💬 Support", url="https://t.me/your_support_username"),
+            InlineKeyboardButton("📢 Updates", url="https://t.me/your_updates_username")
+        ],
+        [
+            InlineKeyboardButton("ℹ️ About", callback_data="about_btn"),
+            InlineKeyboardButton("💎 Premium", callback_data="premium_btn")
+        ],
+        [
+            InlineKeyboardButton("❌ Close", callback_data="close_btn")
+        ]
+    ])
+
+    await message.reply_photo(
+        photo=photo_url,
+        caption=start_caption,
+        reply_markup=keyboard
+    )
+
+@app.on_callback_query()
+async def callback_handler(client: Client, callback_query: CallbackQuery):
+    data = callback_query.data
+
+    if data == "about_btn":
+        about_text = (
+            "╭────────────────⍟\n"
+            " ๏  ᴍʏ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ : 😌\n"
+            "➻ ɴᴀᴍᴇ : ʀᴇɴᴀᴍᴇʀ ᴢᴇxᴏɴ ʙᴏᴛ\n"
+            "➻ ʜᴏᴍᴇ : ᴊᴜꜱᴛʀᴜɴᴍ ᴠᴘꜱ ꜱᴇʀᴠᴇʀ\n"
+            "➻ ʟᴀɴɢᴜᴀɢᴇ : ᴘʏᴛʜᴏɴ ᴇɴɢʟɪꜱʜ\n"
+            "➻ ɢᴏᴅ : ᴍʀ ᴢᴇxᴏɴ ᴘᴀᴠᴀɴ\n"
+            "╰─────────────────⍟"
+        )
+        back_keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔙 Back", callback_data="back_btn")]
+        ])
+        await callback_query.message.edit_caption(
+            caption=about_text,
+            reply_markup=back_keyboard
+        )
+
+    elif data == "back_btn":
+        start_caption = (
+            f"Hello ᴍʀ ᴢᴇxᴏɴ !!\n\n"
+            "This is an advanced and fast rename bot that supports files larger than 2GB, metadata editing, custom captions, and many other advanced tools.\n\n"
+            "Maintained by: Elites Botz"
+        )
+        start_keyboard = InlineKeyboardMarkup([
+            [
+                InlineKeyboardButton("💬 Support", url="https://t.me/your_support_username"),
+                InlineKeyboardButton("📢 Updates", url="https://t.me/your_updates_username")
+            ],
+            [
+                InlineKeyboardButton("ℹ️ About", callback_data="about_btn"),
+                InlineKeyboardButton("💎 Premium", callback_data="premium_btn")
+            ],
+            [
+                InlineKeyboardButton("❌ Close", callback_data="close_btn")
+            ]
+        ])
+        await callback_query.message.edit_caption(
+            caption=start_caption,
+            reply_markup=start_keyboard
+        )
+
+    elif data == "close_btn":
+        await callback_query.message.delete()
 
 @app.on_message(filters.command("status") & filters.user(ADMIN_ID))
 async def bot_status(client: Client, message: Message):
-    # Admin ke liye user info system stats
     status_text = (
         f"📊 **Bot Live Status & User Info**\n\n"
         f"👥 **Total Unique Users:** `{len(registered_users)}`\n"
@@ -42,10 +113,8 @@ async def handle_file(client: Client, message: Message):
     user = message.from_user
     user_id = user.id
 
-    # User ko registered users list mein track karna
     registered_users.add(user_id)
 
-    # File size check (1GB limit)
     file_size_bytes = file.file_size or 0
     max_limit = 1024 * 1024 * 1024  # 1GB
 
@@ -57,7 +126,6 @@ async def handle_file(client: Client, message: Message):
     if file_size_mb == 0:
         file_size_mb = 15.5
 
-    # User data save karna
     user_data[user_id] = {
         'file_id': file.file_id,
         'file_name': file.file_name or "unknown_file",
@@ -65,13 +133,11 @@ async def handle_file(client: Client, message: Message):
         'waiting_for_name': True
     }
 
-    # Step 1: 1 minute (60 seconds) ki processing
     msg = await message.reply_text("⏳ Processing file... Please wait.")
     
     for _ in range(3):
         await asyncio.sleep(20)
 
-    # Step 2: User se naya naam maangna
     await msg.edit_text(
         f"✅ File analyzed successfully!\n\n"
         f"📁 **Old Name:** `{user_data[user_id]['file_name']}`\n"
@@ -79,7 +145,7 @@ async def handle_file(client: Client, message: Message):
         "✍️ **Ab is file ke liye naya naam (New Name) bhejiye:**"
     )
 
-@app.on_message(filters.text & ~filters.command)
+@app.on_message(filters.text & ~filters.command())
 async def handle_text_name(client: Client, message: Message):
     user_id = message.from_user.id
 
@@ -91,11 +157,9 @@ async def handle_text_name(client: Client, message: Message):
     file_size = user_data[user_id]['file_size']
     file_id = user_data[user_id]['file_id']
 
-    # Step 3: 2 second ki processing
     status_msg = await message.reply_text("Processing...⚡")
     await asyncio.sleep(2)
 
-    # Step 4: Download dibbi with 14 blocks
     await status_msg.edit_text(
         f"Status Downloading :\n"
         f"▢▢▢▢▢▢▢▢▢▢▢▢▢▢ 0%\n\n"
@@ -122,11 +186,9 @@ async def handle_text_name(client: Client, message: Message):
         f"ETA: 00:00"
     )
 
-    # Step 5: Now uploading to telegram text
     await status_msg.edit_text("Please wait Uploading...⚡")
     await asyncio.sleep(1)
 
-    # Step 6: Upload dibbi with 14 blocks
     await status_msg.edit_text(
         f"Status Uploading :\n"
         f"▢▢▢▢▢▢▢▢▢▢▢▢▢▢ 0%\n\n"
@@ -148,16 +210,14 @@ async def handle_text_name(client: Client, message: Message):
     await status_msg.edit_text(
         f"Status Uploading :\n"
         f"▣▣▣▣▣▣▣▣▣▣▣▣▣▣ 100%\n\n"
-        f"Size: {file_size} / {file_size}\n"
+        f"Size: {file_size} | {file_size}\n"
         f"Speed: 3.5 MB\n"
         f"ETA: 00:00"
     )
 
-    # Global count increment karna
     global total_renamed_files
     total_renamed_files += 1
 
-    # Asli file ko naye naam ke sath telegram par wapas bhejna
     await client.send_document(
         chat_id=message.chat.id,
         document=file_id,
@@ -168,6 +228,6 @@ async def handle_text_name(client: Client, message: Message):
     del user_data[user_id]
 
 if __name__ == "__main__":
-    print("🤖 Pyrogram Bot with User Info System is running...")
+    print("🤖 Pyrogram Bot with About & Close Buttons is running...")
     app.run()
     
