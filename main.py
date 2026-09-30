@@ -107,7 +107,7 @@ async def handle_links(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def main():
     # Apna Telegram Bot Token yahan daalein
-    BOT_TOKEN = "YOUR_BOT_TOKEN_HERE"
+    BOT_TOKEN = "8854808620:AAGBMQLYiIUC3yHb6pLISKyAd-_VxwAnpDw"
     
     application = ApplicationBuilder().token(BOT_TOKEN).build()
 
