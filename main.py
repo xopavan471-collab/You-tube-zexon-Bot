@@ -35,20 +35,10 @@ async def list_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     await update.message.reply_text(text, parse_mode="Markdown")
 
-# Advanced Bypass Core Engine (Yahan aap apni heavy bypass APIs/scripts connect karenge)
+# Advanced Bypass Core Engine
 async def advanced_bypass_engine(url: str) -> str:
-    # Asynchronous request example ya custom backend script routing
-    # Yahan hum advanced headers aur cookies spoofing implement kar sakte hain
-    
     async with aiohttp.ClientSession() as session:
-        # Example logic placeholder for backend bypass API integration
-        # async with session.get(f"https://api.yourbypassengine.com/v1/bypass?url={url}") as resp:
-        #     data = await resp.json()
-        #     return data.get("bypassed_url")
-        
         # Simulated high-speed result for demonstration
-        await aiohttp.AsyncClient().get(url, allow_redirects=True) if False else None
-        
         if "shortxlinks" in url or "vplink" in url or "earnlinks" in url:
             return "https://devuploads.com/badimsg52csb"
         else:
@@ -77,13 +67,13 @@ async def handle_links(update: Update, context: ContextTypes.DEFAULT_TYPE):
             elapsed_time = round(time.time() - start_time, 2)
             
             result_text = (
-                f"👤 **MR 🧞 {user_name.upper()}**\n"
+                f"👤 **MR G{user_name.upper()}**\n"
                 f"🔗 `{user_text}`\n\n"
                 f"✅ **Bypassed Link:**\n`{bypassed_link}`\n\n"
                 f"⏳ **Elapsed:** `{elapsed_time}s` ✨"
             )
             
-            # Interactive Buttons (Open Link, Updates, Group)
+            # Interactive Buttons
             keyboard = [
                 [InlineKeyboardButton("🔗 Open Link", url=bypassed_link)],
                 [InlineKeyboardButton("📢 Updates", url="https://t.me/your_channel"),
@@ -121,3 +111,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    
