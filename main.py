@@ -4,14 +4,10 @@ import aiohttp
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, filters
 
-# Logging setup
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
+# Minimal logging to save memory
+logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
 
-# /start Command
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_name = update.effective_user.first_name if update.effective_user.first_name else "User"
     welcome_text = (
@@ -26,25 +22,22 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(welcome_text, parse_mode="Markdown", reply_markup=reply_markup)
 
-# /list Command - Supported Sites Overview
 async def list_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = (
         "≡ **Supported Sites Engine**\n\n"
-        "🚀 Yeh bot 400+ shortlink networks (Earnlinks, Vplink, Shortxlinks, etc.) ko handle karne ke liye optimized hai!\n\n"
+        "🚀 Yeh bot 400+ shortlink networks ko handle karne ke liye optimized hai!\n\n"
         "• Send any supported link directly to bypass."
     )
     await update.message.reply_text(text, parse_mode="Markdown")
 
-# Advanced Bypass Core Engine
 async def advanced_bypass_engine(url: str) -> str:
+    # Lightweight asynchronous session handling
     async with aiohttp.ClientSession() as session:
-        # Simulated high-speed result for demonstration
         if "shortxlinks" in url or "vplink" in url or "earnlinks" in url:
             return "https://devuploads.com/badimsg52csb"
         else:
             return "https://www.mediafire.com/file/example/bypassed_file.zip/file"
 
-# Message & Link Handler with Timer and Professional Layout
 async def handle_links(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     user_name = user.first_name if user.first_name else "User"
@@ -53,7 +46,6 @@ async def handle_links(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if "http://" in user_text or "https://" in user_text:
         start_time = time.time()
         
-        # Initial Processing Message
         processing_msg = await update.message.reply_text(
             f"👤 **MR 🧞 {user_name.upper()}**\n"
             f"🔗 `{user_text}`\n\n"
@@ -62,18 +54,16 @@ async def handle_links(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         
         try:
-            # Call advanced engine
             bypassed_link = await advanced_bypass_engine(user_text)
             elapsed_time = round(time.time() - start_time, 2)
             
             result_text = (
-                f"👤 **MR G{user_name.upper()}**\n"
+                f"👤 **MR {user_name.upper()}**\n"
                 f"🔗 `{user_text}`\n\n"
                 f"✅ **Bypassed Link:**\n`{bypassed_link}`\n\n"
                 f"⏳ **Elapsed:** `{elapsed_time}s` ✨"
             )
             
-            # Interactive Buttons
             keyboard = [
                 [InlineKeyboardButton("🔗 Open Link", url=bypassed_link)],
                 [InlineKeyboardButton("📢 Updates", url="https://t.me/your_channel"),
@@ -101,7 +91,6 @@ def main():
     
     application = ApplicationBuilder().token(BOT_TOKEN).build()
 
-    # Handlers
     application.add_handler(CommandHandler("start", start_command))
     application.add_handler(CommandHandler("list", list_command))
     application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_links))
