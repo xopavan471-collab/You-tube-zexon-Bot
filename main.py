@@ -77,10 +77,10 @@ def human_readable_size(b):
 def get_progress_bar(p):
     t = 16
     if p >= 99.5:  # Pure 100% par poori 16 dibbi bharegi
-        return "■" * t
+        return "▣" * t
     c = int((p / 100) * t)
     c = min(max(c, 0), t - 1)  # Complete hone se pehle max 15 dibbi
-    return "■" * c + "□" * (t - c)
+    return "▣" * c + "▢" * (t - c)
 
 def safe_remove(p):
     try:
@@ -309,12 +309,12 @@ async def process(client, message):
                                 eta = 0 if is_complete else (total - downloaded) / speed if speed > 0 else 0
                                 bar = get_progress_bar(percent)
                                 txt = (
-                                    f"<blockquote><b>ꜱᴛᴀᴛᴜꜱ ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ :</b>\n"
+                                    f"<b>ꜱᴛᴀᴛᴜꜱ ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ :</b>\n"
                                     f"<code>{bar}</code>\n"
                                     f"<b>ꜱɪᴢᴇ :</b> {human_readable_size(downloaded)} | {human_readable_size(total)}\n"
                                     f"<b>ᴅᴏɴᴇ :</b> {make_fancy(int(percent))}%\n"
                                     f"<b>ꜱᴘᴇᴇᴅ :</b> {human_readable_size(speed)}\n"
-                                    f"<b> ᴇᴛᴀ :</b> {make_fancy(int(eta))} s</blockquote>"
+                                    f"<b> ᴇᴛᴀ :</b> {make_fancy(int(eta))} s"
                                 )
                                 safe_edit(txt)
 
@@ -340,12 +340,12 @@ async def process(client, message):
                 eta = 0 if is_complete else ((total - current) / speed if speed > 0 else 0)
                 bar = get_progress_bar(percent)
                 txt = (
-                    f"<blockquote><b>ꜱᴛᴀᴛᴜꜱ ᴜᴘʟᴏᴀᴅɪɴɢ :</b>\n"
+                    f"<b>ꜱᴛᴀᴛᴜꜱ ᴜᴘʟᴏᴀᴅɪɴɢ :</b>\n"
                     f"<code>{bar}</code>\n"
                     f"<b>ꜱɪᴢᴇ :</b> {human_readable_size(current)} | {human_readable_size(total)}\n"
                     f"<b>ᴅᴏɴᴇ :</b> {make_fancy(int(percent))}%\n"
                     f"<b>ꜱᴘᴇᴇᴅ :</b> {human_readable_size(speed)}\n"
-                    f"<b> ᴇᴛᴀ :</b> {make_fancy(int(eta))} s</blockquote>"
+                    f"<b> ᴇᴛᴀ :</b> {make_fancy(int(eta))} s"
                 )
                 try: await status_msg.edit_text(txt, parse_mode=ParseMode.HTML)
                 except Exception: pass
@@ -383,12 +383,12 @@ async def process(client, message):
                         bar = get_progress_bar(percent)
 
                         txt = (
-                            f"<blockquote><b>ꜱᴛᴀᴛᴜꜱ ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ :</b>\n"
+                            f"<b>ꜱᴛᴀᴛᴜꜱ ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ :</b>\n"
                             f"<code>{bar}</code>\n"
                             f"<b>ꜱɪᴢᴇ :</b> {human_readable_size(downloaded)} | {human_readable_size(total)}\n"
                             f"<b>ᴅᴏɴᴇ :</b> {make_fancy(int(percent))}%\n"
                             f"<b>ꜱᴘᴇᴇᴅ :</b> {human_readable_size(speed)}\n"
-                            f"<b> ᴇᴛᴀ :</b> {make_fancy(int(eta))} s</blockquote>"
+                            f"<b> ᴇᴛᴀ :</b> {make_fancy(int(eta))} s"
                         )
                         safe_edit(txt)
                     except Exception:
@@ -441,22 +441,22 @@ async def process(client, message):
                 eta = 0 if is_complete else ((t - c) / speed if speed > 0 else 0)
                 bar = get_progress_bar(p)
                 txt = (
-                    f"<blockquote><b>ꜱᴛᴀᴛᴜꜱ ᴜᴘʟᴏᴀᴅɪɴɢ :</b>\n"
+                    f"<b>ꜱᴛᴀᴛᴜꜱ ᴜᴘʟᴏᴀᴅɪɴɢ :</b>\n"
                     f"<code>{bar}</code>\n"
                     f"<b>ꜱɪᴢᴇ :</b> {human_readable_size(c)} | {human_readable_size(t)}\n"
                     f"<b>ᴅᴏɴᴇ :</b> {make_fancy(int(p))}%\n"
                     f"<b>ꜱᴘᴇᴇᴅ :</b> {human_readable_size(speed)}\n"
-                    f"<b> ᴇᴛᴀ :</b> {make_fancy(int(eta))} s</blockquote>"
+                    f"<b> ᴇᴛᴀ :</b> {make_fancy(int(eta))} s"
                 )
                 try: await status_msg.edit_text(txt,parse_mode=ParseMode.HTML)
                 except Exception: pass
 
-            if local_file and os.path.exists(local_file):
-                await client.send_document(
+             if local_file and os.path.exists(local_file):
+                await client.send_video(
                     chat_id=message.chat.id,
-                    document=local_file,
+                    video=local_file,
+                    supports_streaming=True,
                     progress=up_progress,
-                    force_document=True
                 )
                 try:
                     await status_msg.delete()
