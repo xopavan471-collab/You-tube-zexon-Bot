@@ -396,8 +396,9 @@ async def process(client, message):
 
             def run_social():
                 opts = {
-                    "format": "bestvideo+bestaudio/best",
-                    "merge_output_format": "mp4",
+                    "format": "best[height<=720][ext=mp4]/best[ext=mp4]/best",
+                    "merge_output_format": None,
+                    "postprocessors": [],
                     "outtmpl": f"dl_{user_id}_%(id)s.%(ext)s",
                     "quiet": True, "no_warnings": True, "nocheckcertificate": True,
                     "retries": 10, "fragment_retries": 10,
@@ -462,10 +463,6 @@ async def process(client, message):
                 except Exception:
                     pass
 
-    except Exception as e:
-        print(f"Process Error: {e}")
-        try: await message.reply_text("❌ Something went wrong during download/upload.", parse_mode=ParseMode.HTML)
-        except Exception: pass
 
     # --- AUTOMATIC FILE KACHRA (CLEANUP) SYSTEM ---
     finally:
