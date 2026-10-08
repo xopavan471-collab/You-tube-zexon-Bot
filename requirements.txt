@@ -1,5 +1,4 @@
-pyrofork
-tgcrypto
-requests
+python-telegram-bot
+aiohttp
 beautifulsoup4
 
