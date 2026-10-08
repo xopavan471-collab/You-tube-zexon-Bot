@@ -1,7 +1,7 @@
 import logging
 import re
-import aiohttp
-from bs4 import BeautifulSoup
+import asyncio
+from playwright.async_api import async_playwright
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
@@ -16,58 +16,46 @@ def extract_url(text: str) -> str:
     match = re.search(url_pattern, text)
     return match.group(0) if match else text.strip()
 
-# Primary method: External Bypass API
-async def api_bypass(url: str) -> str:
-    try:
-        api_endpoint = f"https://api.bypass.vip/bypass?url={url}"
-        async with aiohttp.ClientSession() as session:
-            async with session.get(api_endpoint, timeout=20) as resp:
-                if resp.status == 200:
-                    data = await resp.json()
-                    if data.get("status") == "success" and data.get("destination"):
-                        return data.get("destination")
-    except Exception:
-        pass
-    return None
-
-# Fallback method: Direct HTTP / Meta Redirects
-async def fallback_bypass(url: str) -> str:
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    }
-    try:
-        async with aiohttp.ClientSession(headers=headers) as session:
-            async with session.get(url, allow_redirects=True, timeout=15) as response:
-                final_dest = str(response.url)
-                html_text = await response.text()
-                soup = BeautifulSoup(html_text, "html.parser")
-                meta_refresh = soup.find("meta", attrs={"http-equiv": re.compile(r"refresh", re.I)})
-                
-                if meta_refresh and "content" in meta_refresh.attrs:
-                    content = meta_refresh["content"]
-                    if "url=" in content.lower():
-                        extracted_url = content.split("url=")[-1].strip("'\"")
-                        return await fallback_bypass(extracted_url)
-
-                return final_dest
-    except Exception as e:
-        return f"Error: {str(e)}"
-
-# Main Bypass Logic
-async def smart_bypass(url: str) -> str:
+# Headless Browser Bypass Engine
+async def playwright_bypass(url: str) -> str:
     if not url.startswith(("http://", "https://")):
         url = "https://" + url
 
-    # Try API first
-    bypassed = await api_bypass(url)
-    if bypassed and bypassed != url:
-        return bypassed
+    async with async_playwright() as p:
+        # Launch Headless Chromium Browser
+        browser = await p.chromium.launch(
+            headless=True,
+            args=["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"]
+        )
+        context = await browser.new_context(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        )
+        page = await context.new_page()
 
-    # Fallback to direct redirect
-    return await fallback_bypass(url)
+        try:
+            # Navigate to shortener link
+            await page.goto(url, wait_until="domcontentloaded", timeout=30000)
+            
+            # Wait for timers and redirects (up to 12 seconds)
+            await asyncio.sleep(10)
+
+            # Extract current final URL
+            final_url = page.url
+
+            # If redirected to secondary runner page, wait a bit more
+            if "runner" in final_url or "go" in final_url:
+                await asyncio.sleep(5)
+                final_url = page.url
+
+            await browser.close()
+            return final_url
+
+        except Exception as e:
+            await browser.close()
+            return f"Error: {str(e)}"
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    welcome_text = "⚡ **Zexon Link Bypass Bot** ⚡\n\nMujhe koi bhi shortener link bhejo, main destination link nikal dunga!"
+    welcome_text = "⚡ **Headless Chrome Link Bypass Bot** ⚡\n\nMujhe koi bhi shortener link bhejo, main Playwright browser se bypass karke final link nikal dunga!"
     await update.message.reply_text(welcome_text, parse_mode="Markdown")
 
 async def handle_link(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -75,19 +63,19 @@ async def handle_link(update: Update, context: ContextTypes.DEFAULT_TYPE):
     url = extract_url(text)
 
     if not ("http://" in url or "https://" in url or "." in url):
-        await update.message.reply_text("❌ Kripya ek valid link bhejein!")
+        await update.message.reply_text("❌ Kripya ek valid URL bhejein!")
         return
 
-    status_msg = await update.message.reply_text("🔎 **Bypassing Link...**\n⏳ *Thoda wait karein...*", parse_mode="Markdown")
+    status_msg = await update.message.reply_text("🌐 **Opening Headless Browser & Bypassing...**\n⏳ *Isme 10-15 seconds lag sakte hain...*", parse_mode="Markdown")
 
-    final_url = await smart_bypass(url)
+    final_url = await playwright_bypass(url)
 
     if final_url and final_url.startswith("http") and final_url != url:
         response_text = f"✅ **Link Bypassed Successfully!**\n\n🔗 **Original Link:**\n`{final_url}`"
         keyboard = [[InlineKeyboardButton("Open Final Link 🚀", url=final_url)]]
         await status_msg.edit_text(response_text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
     else:
-        await status_msg.edit_text("❌ **Bypass Failed!** Ye shortener protected/complex script use kar raha hai.", parse_mode="Markdown")
+        await status_msg.edit_text(f"❌ **Bypass Failed / Same URL:**\n`{final_url}`", parse_mode="Markdown")
 
 def main():
     app = Application.builder().token(BOT_TOKEN).build()
